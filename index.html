@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+	
+	<!-- Propriétés de la Page -->
+	<head>
+
+		<!-- Nature de la page -->
+		<meta charset="utf-8"/>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<!-- Onglet de la page -->
+		<title>Th&eacute;o Richier | TP n°9</title>
+		<!-- Importation de la Police d'écriture -->
+		<link href="https://fonts.googleapis.com/css2?family=Nova+Mono&display=swap" rel="stylesheet"/>
+		<!-- Lien vers d'autres fichiers -->
+		<link type="text/css" rel="stylesheet" href="style.css" />
+                <link rel="shorcut icon" href="../assets/img/favicon.jpg" type="image/x-icon">
+		
+	</head>
+
+	<!-- Corps de la Page -->
+	<body>
+                
+                <div id="stats"></div>
+                <div class="container">
+                        <div class="header">
+                                <!-- Un titre centré -->
+                                <h1><mark>Représentation 3D d'un tableau 2D</mark></h1>
+                        </div>
+                        <div class="projet">
+                                <!-- API importe du site de Three.js -->
+                                <script src="lib/three.min.js"></script>
+                                <script src="lib/OBJLoader.js"></script>
+                                <script src="lib/MTLLoader.js"></script>
+                                <script src="lib/OrbitControls.js"></script>
+                                </script><!-- Bibliotheques en local -->
+                                <script src="lib/jquery-1.8.3.min.js"></script>
+                                <script src="lib/Coordinates.js"></script>
+                                <script src="lib/dat.gui.min.js"></script>
+                                <script src="lib/stats.min.js"></script>
+                                <script src="lib/tween.min.js"></script>
+                                <!-- Pour mettre le rendu Web GL centre -->
+                                <div id="webGL"></div>
+                                <!-- Mon script avec un chemin relatif -->
+                                <script src="app.js"></script>
+                                <script>
+                                        addToDOM();// Execute la fonction qui ajoute le rendu
+                                </script>
+                        </div>
+                        <div class="illustration">
+                                <!-- La peinture -->
+                                <img src="img.jpg" alt="My logo" title="This is my logo" id="logo" class="img" />
+                        </div>
+                        <div class="description">
+                                <!-- Description de la peinture -->
+                                <h2><mark>La reproduction interdite</mark></h2>
+                                <p><a class="wiki" href="https://fr.wikipedia.org/wiki/Ren%C3%A9_Magritte" target="_blank">René Magritte</a> – <em>La reproduction interdite</em></p>
+                                <p><a class="wiki" href="https://fr.wikipedia.org/wiki/La_Reproduction_interdite" target="_blank"><em>La Reproduction interdite</em></a> est une huile sur toile peinte en 1937.<br><br>
+                                Le tableau représente un homme brun regardant de dos dans un miroir qui ne reflète pas le visage du personnage mais son dos.
+                                Il est donc impossible de voir le visage du personnage en question.<br>
+                                Un livre placé sur le rebord devant le miroir se reflète correctement dans le coin inférieur droit du tableau.
+                                Ce livre est une copie du roman <a class="wiki" href="https://fr.wikipedia.org/wiki/Les_Aventures_d%27Arthur_Gordon_Pym" target="_blank"><em>Les Aventures d'Arthur Gordon Pym</em></a> de l'auteur américain <a class="wiki" href="https://fr.wikipedia.org/wiki/Edgar_Allan_Poe" target="_blank">Edgar Allan Poe</a>, l'un des auteurs préférés du peintre.</p>
+                        </div>
+                        <div class="technique">
+                                <h2><mark>Description technique</mark></h2>
+                                <h3>[x] Objets 3D</h3>
+                                <p>Premièrement je me suis concentré sur les objets 3D, pour ce faire chaque objet 3D est stocké dans sa <mark>function</mark> à lui. <br>
+                                Après, j'ai commencé par créer avec des <mark>new THREE.BoxGeometry( w, h, l ), murMaterial )</mark>, la box qui comporterait l'ensemble des éléments du tableau. <br> 
+                                Par la suite, je devais créer les objets 3D du tableau, c'est-à-dire le meuble, le cadre du miroir, le personnage et le livre. Pour créer le meuble et le cadre du tableau, j'ai continué à utiliser des <mark>BoxGeometry</mark>. Mais pour le personnage et le livre, ce sont des <mark>OBJ</mark> qui ont été créés ou fortement modifier sur <mark>Blender</mark> avec un lissage des vertex ainsi qu'une optimisation de la taille en Ko. <br>
+                                Ces derniers ont été ensuite chargés sur notre scène grâce à <mark>OBJLoader.js</mark> et pour des textures intégrer au modèle 3D, j'ai dû utiliser <mark>MTLLoader.js</mark> pour charger les textures.</p>
+                                <h3>[x] Brouillard</h3>
+                                <p>Pour créer un brouillard, il suffit d'utiliser <mark>THREE.Fog</mark> avec en paramètre une couleur, un near et un far.</p>
+                                <h3>[x] Effet miroir</h3>
+                                <p>Concernant l'effet de miroir, nous avons besoin de: <br>
+                                - Une surface : le miroir sert d'écran pour projeter ce qu'une caméra regarde, dans notre cas j'ai utilisé une <mark>BoxGeometry</mark> sur lequel j'applique comme texture d'environnement map <mark>envMap:cubeRenderTarget.texture</mark> qui est pour traduire, ce que regarde la caméra utilisée pour le miroir<br>
+                                - Une caméra : j'ai pris un <mark>CubeCamera</mark> au lieu de <mark>PerspectiveCamera</mark>, que ne prendre pas en compte de perspective, et qui prend en paramètre un <mark>near</mark>, un <mark>far</mark> et un <mark>renderTarget</mark><br>
+                                - Un double de la box: comme nous ne pouvons pas filtrer les objets visibles de la caméra, pour respecter le plus possible le tableau, j'ai créé un double de la scène avec les objets voulus et la camera film se double</p>
+                                <h3>[x] Eclairage</h3>
+                                <p>Concernant les sources de lumières, nous en avons 4:<br>
+                                - 1 <mark>AmbientLight</mark> : cela applique une couleur et à l'ensemble de la pièce de façon uniforme<br>
+                                - 1 <mark>SpotLight</mark> : utilisé pour l'éclairage du personnage utilisé et les ombres portées<br>
+                                - 2 <mark>PointLight</mark> : utilisé pour l'éclairage du double de la box pour le miroir et pour éclairer l'ensemble de la scène pour les reflets spéculaires</p>
+                                <h3>[x] Ombres portées</h3>
+                                <p>Pour appliquer des ombres portés à la scène, je dois appliquer le paramètre les booléans de source des ombres (<mark>castShadow = true</mark>), et l'affichage des ombres sur un objet (<mark>receiveShadow = true</mark>).<br>
+                                Dans notre cas, nous avons le personnage que à <mark>castShadow = true</mark> et nous avons le solidGround (mer), le sol, meuble, le miroir, le livre qui ont <mark>receiveShadow = true</mark>.</p>
+                                <h3>[x] Texture avec transparence</h3>
+                                <p>La seule texture transparente de la scène concerne les portails qui sont des <mark>THREE.SpriteMaterial</mark> avec l'option <mark>transparent: true</mark> pour permet l'activation de la transparence.</p>
+                                <h3>[x] Sprites</h3>
+                                <p>Les Sprites que je suis permis de faire sont la référence des portails de la série "Rick et Morty", ces sprites contenu dans un <mark>THREE.SpriteMaterial</mark> avec pour textures, une <mark>map</mark> et une <mark>normalMap</mark> pour avoir l'impression d'un objet 3D.</p>
+                                <h3>[x] Environment map</h3>
+                                <p>L'Environment map, n'avait pas beaucoup d'intérêt dans mon tableau à part pour le miroir, mais comme il en fallait une autre, j'ai créé une grande <mark>PlaneGeometry</mark> avec une <mark>envMap</mark> appliqué pour faire penser à une mer calme en le voyant.</p>
+                                <h3>[x] Skybox</h3>
+                                <p>Concernant la <mark>skybox</mark>, j'ai voulu faire un fond qui rappelle l'espace. Pour faire une bonne skybox étoilé, j'ai utilisé que <mark>6 images</mark> pour la faire, car étant donné que les images sont très sombres, nous ne verrons pas les brisures de la skybox</p>
+                                <h3>[x] specular/normal maps</h3>
+                                <p>Ce projet n'utilise pas de <mark>specularMap</mark> car il n'y en avait pas l'obligation d'en avoir par rapport à mon tableau. Mais concernant les <mark>normalMap</mark>, tout objet 3D utilisant une texture appelée depuis le dossier "/textures/" a par la même occasion appliqué une normale de la texture sur l'objet 3D.</p>
+                                <h3>[x] Shaders</h3>
+                                <p>Les Shaders sont composés d'une variable <mark>fragment shader</mark> et <mark>vertex shader</mark> que l'on applique sur le matériau <mark>THREE.ShaderMaterial</mark>. Pour le shader en question, j'ai décidé de créer un shader qui applique <mark>toutes les couleurs de spectre visible</mark> sur une <mark>THREE.SphereGeometry</mark>.</p>
+                                <h3>[x] Interaction par GUI</h3>
+                                <p>Concernant les interactions par le <mark>GUI</mark>, j'ai décidé de créer: <br>
+                                - L'affichage des axes et grilles XYZ : venu et revu en cours, cette méthode ne devrait être inconnue pour personne<br>
+                                - Le spot camera : cette interaction est utilisée pour mettre la caméra sur un certain pour de vue, permet dans le cas présent de voir tous les éléments de la scène sans difficultés. Les coordonnées de la position sont stockées dans une fonction <mark>spot</mark> et appelé par le bouton de l'interface GUI<br>
+                                - Le zoom max : j'ai mis la possiblité de faire un zoom par rapport a les hauteurs en pixels de notre écran (<mark>window.innerHeight</mark>) car la taille de base de notre tableau est assez petit avec <mark>canvasHeight = 503</mark> et <mark>canvasWidth = 400</mark>. Notre scène, respect l'aspect ratio du tableau d'origine qui est à peu près du 0.8 : 1<br>
+                                - La visibilité : certains éléments de notre tableau doivent devenir invisibles pour permettre de voir le reste des éléments de la scène, c'est le cas des murs qui servent a accentué la ressemblance par rapport au tableau d'origine. Pour cela, il suffit de faire créer une <mark>booléan</mark> et l'appliquer à la variable <mark>visible</mark> et mettre la vérification de l'état du booléan dans <mark>render()</mark><br>
+                                - La rotation du personnage : j'ai donné la possibilité au personnage faire une rotation sur lui-même, pour permettre à l'observateur de voir que le miroir n'est pas juste une image statique comme un png et autres. Pour faire cette rotation, j'ai créé une variable dans le <mark>GUI</mark> contenant la valeur par défaut, et je permets au <mark>GUI</mark> de faire varier cette valeur entre -180 et 180. Ensuite, il suffit de créer la rotation depuis la méthode <mark>render()</mark> avec : <mark>body.rotation.y = effectController.personnageAngle * Math.PI / 180</mark><br>
+                                - Les resets : ces interactions sont identiques à l'interaction <mark>spot caméra</mark>, elles contiennent juste la rotation par défaut du personnage et la position par défaut de la caméra <mark>Observateur</mark></p>
+                                <h3>[x] Animation</h3>
+                                <p>Il y a un total de 4 animations sur cette scène, une utilise le système de <mark>Tweening</mark>. <br>
+                                Mais pour les autres, j'ai décidé de faire des animations à mouvement circulaire. Pour cela, j'ai créé les variables <mark>animation</mark> et <mark>temps</mark>, qui augmentent leurs valeurs à chaque itération de la méthode <mark>render()</mark> qui est une boucle infinie. J'applique donc ces variables sur les positions des objets, et pour qu'il tourne autour d'un point, j'utilise les fameux <mark>Math.cos</mark> et <mark>Math.sin</mark>, les deux réunis donnent : <mark>object.position.x = 100 * Math.cos( animation * Math.PI / 180 )</mark>. <br>
+                                Cette méthode est utilisée pour les animations des portails, de la planète Terre, et la sphère de shaders.</p>
+                                <h3>[x] Tweening</h3>
+                                <p>En utilisant <mark>Tween.js</mark>, j'ai fait une animation de Cubes que augmentent et diminue leur <mark>scale</mark> de façon linéaire et se déplaçant dans une zone donnée.</p>
+                        </div>
+                        <div class="footer">
+                                <h1><a href="https://www.linkedin.com/in/richier-theo/" target="_blank">Th&eacute;o Richier</a></h1>
+                        </div>
+                </div>
+                <script src="lib/wikipedia-preview.1.4.4.js" ></script>
+                <script>
+                wikipediaPreview.init({
+                        lang: 'fr',
+                        selector: '.wiki',
+                        debug: true,
+                });
+                </script>
+	</body>
+
+</html>
